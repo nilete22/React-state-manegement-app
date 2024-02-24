@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { StatisticLine} from "./Statistics.jsx";
+import { Button } from "./Button.jsx";
 
 const App = () => {
   const [good, setGood] = useState(0);
@@ -8,6 +9,16 @@ const App = () => {
   const all = (good + neutral + bad);
   const average = (good - bad) / all;
   const positive = (good * 100) / all;
+
+  const handleGoodIncrement = () => {
+    setGood((prevTotal) => prevTotal + 1);
+  }
+  const handleNeutralIncrement = () => {
+    setNeutral((prevTotal) => prevTotal + 1);
+  }
+  const handleBadIncrement = () => {
+    setBad((prevTotal) => prevTotal + 1);
+  }
 
   const anecdotes = [
     'If it hurts, do it more often.',
@@ -20,26 +31,59 @@ const App = () => {
     'The only way to go fast, is to go well.'
   ]
 
+  const [selected, setSelected] = useState(0);
+  const [anecdote, setText] = useState(anecdotes[0]);
+  const [votes, setVotes] = useState(new Array(anecdotes.length).fill(0));
+
+  const handleAnecdoteSelect = () => {
+    const newSelected = Math.floor(Math.random() * anecdotes.length);
+    setSelected(newSelected);
+    setText(anecdotes[newSelected]);
+  }
+
+  const handleAnecdoteVote = () => {
+    const newVotes = [...votes];
+    newVotes[selected]++;
+    setVotes(newVotes);
+  }
+
+  const maxVotes = Math.max(...votes);
+  const maxIndices = votes.reduce((acc, vote, index) => {
+    if (vote === maxVotes) {
+      acc.push(index);
+    }
+    return acc;
+  }, []);
+
   return (
     <div>
       <h1>give feedback</h1>
 
-      <button onClick={() => {setGood(good +1)}}>good</button>
-      <button onClick={() => {setNeutral(neutral +1)}}>neutral</button>
-      <button onClick={() => {setBad(bad +1)}}>bad</button>
+      <Button handler={handleGoodIncrement} text="Good"/>
+      <Button handler={handleNeutralIncrement} text="Neutral"/>
+      <Button handler={handleBadIncrement} text="Bad"/>
 
-      <h1>statistics</h1>
-        <table>
-          <tbody>
+      <h2>statistics</h2>
+      {all > 0 && (
+        <ul>
             <StatisticLine text="good" value={good} />
             <StatisticLine text="neutral" value={neutral} />
             <StatisticLine text="bad" value={bad} />
             <StatisticLine text="all" value={all} />
             <StatisticLine text="average" value={average} />
             <StatisticLine text="positive" value={positive + "%"}/>
-          </tbody>
-        </table>
-        <h1>Anecdote of the day</h1>
+        </ul>
+      )}
+
+      <h1>anecdotes</h1>
+        <p>{anecdote}</p>
+        <p>has {votes[selected]} votes</p>
+        <button onClick={handleAnecdoteVote}>vote</button>
+        <button onClick={handleAnecdoteSelect}>next anecdote</button>
+
+        <h1>Anecdote with the most votes</h1>
+        <p>{anecdotes[maxIndices[0]]}</p>
+        <p>has {maxVotes} votes</p>
     </div>
   );
 };
